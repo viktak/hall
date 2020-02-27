@@ -843,10 +843,13 @@ void handleNotFound(){
 void SendHeartbeat(){
   if (PSclient.connected()){
 
+    TimeChangeRule *tcr;        // Pointer to the time change rule
+    time_t localTime = myTZ.toLocal(now(), &tcr);
+
     const size_t capacity = JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(6) + 180;
     StaticJsonDocument<capacity> doc;
 
-    doc["Time"] = DateTimeToString(now());
+    doc["Time"] = DateTimeToString(localTime);
     doc["Node"] = ESP.getChipId();
     doc["Freeheap"] = ESP.getFreeHeap();
     doc["FriendlyName"] = appConfig.friendlyName;
@@ -1082,6 +1085,9 @@ void setup() {
 
   // Set the initial connection state
   connectionState = STATE_CHECK_WIFI_CONNECTION;
+
+  //  Read temperatures as soon as we have connection
+  needsTemperature = true;
 
 }
 
