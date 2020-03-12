@@ -1,8 +1,6 @@
 #define __debugSettings
 #include "includes.h"
 
-char defaultSSID[16];
-
 //  Web server
 ESP8266WebServer server(80);
 
@@ -68,7 +66,7 @@ void LogEvent(int Category, int ID, String Title, String Data){
 
     Serial.println(msg);
 
-    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + String(ESP.getChipId()) + "/log/", msg ).set_qos(0));
+    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/log", msg ).set_qos(0));
   }
 }
 
@@ -869,7 +867,7 @@ void SendHeartbeat(){
 
     serializeJson(doc, myJsonString);
 
-    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/STATE", myJsonString ).set_qos(0));
+    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/HEARTBEAT", myJsonString ).set_qos(0));
   }
 
   needsHeartbeat = false;
@@ -881,7 +879,7 @@ void ReadTemperatures(){
     for (size_t i = 0; i < oneWireDevicesCount; i++) {
       thermometers[i].measuredTemperatureC = sensors.getTempC(thermometers[i].deviceAddress);
       if (thermometers[i].measuredTemperatureC!=-127){
-        PSclient.publish(MQTT::Publish("viktak/spiti/" + String(ESP.getChipId()) + "/thermometers/" + OneWireDeviceAddress2HEX(thermometers[i].deviceAddress, ':'), String(thermometers[i].measuredTemperatureC)).set_qos(0));
+        PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/thermometers/" + OneWireDeviceAddress2HEX(thermometers[i].deviceAddress, ':'), String(thermometers[i].measuredTemperatureC) ).set_qos(0));
         LogEvent(ReadTemp, 1, "Measurement", "1Wire: " + thermometers[i].FriendlyName + ": " + String(thermometers[i].measuredTemperatureC));
       }
     }
@@ -969,9 +967,6 @@ void setup() {
   Serial.println("Software version: " + FirmwareVersionString);
   Serial.println();
 
-  sprintf(defaultSSID, "ESP-%u", ESP.getChipId());
-  WiFi.hostname(defaultSSID);
-
   //  File system
   if (!SPIFFS.begin()){
     Serial.println("Error: Failed to initialize the filesystem!");
@@ -983,6 +978,9 @@ void setup() {
   } else {
     Serial.println("Config loaded.");
   }
+
+  sprintf(defaultSSID, "%s-%u", appConfig.mqttTopic, ESP.getChipId());
+  WiFi.hostname(defaultSSID);
 
   //  Digital inputs
   for (size_t i = 0; i < sizeof(digitalInputs)/sizeof(digitalInputs[0]); i++) pinMode(digitalInputs[i].gpio, INPUT_PULLUP);
@@ -1166,7 +1164,7 @@ void loop(){
             digitalWrite(CONNECTION_STATUS_LED_GPIO, HIGH);
             delay(950);
           }
-          if (attempt == 31) {
+          if (attempt > WIFI_CONNECTION_TIMEOUT) {
             Serial.println();
             Serial.println("Could not connect to WiFi");
             delay(100);
@@ -1211,18 +1209,11 @@ void loop(){
         if (!PSclient.connected()) {
           PSclient.set_server(appConfig.mqttServer, appConfig.mqttPort);
 
-          String msg = "{";
-          msg += "\"Node\":" + (String)ESP.getChipId() + ",";
-          msg += "\"Category\":1,";
-          msg += "\"ID\":2,";
-          msg += "\"Title\":\"Node offline\",";
-          msg += "\"Data\":\"";
-          msg += DateTimeToString(now());
-          msg += "\"}";
-
-          if (PSclient.connect("ESP-" + String(ESP.getChipId()), MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + String(ESP.getChipId()) + "/log", 0, true, msg )){
+          if (PSclient.connect("ESP-" + String(ESP.getChipId()), MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE", 0, true, "offline" )){
             PSclient.set_callback(mqtt_callback);
-            PSclient.subscribe(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + String(ESP.getChipId()) + "/incoming", 0);
+            PSclient.subscribe(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/cmnd", 0);
+
+            PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE", "online" ).set_qos(0).set_retain(true));
             LogEvent(EVENTCATEGORIES::Conn, 1, "Node online", WiFi.localIP().toString());
           }
         }
