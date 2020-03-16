@@ -610,6 +610,7 @@ void handleGeneralSettings() {
 
   if (server.method() == HTTP_POST){  //  POST
     bool mqttDirty = false;
+
     if (server.hasArg("timezoneselector")){
       signed char oldTimeZone = appConfig.timeZone;
       appConfig.timeZone = atoi(server.arg("timezoneselector").c_str());
@@ -653,16 +654,19 @@ void handleGeneralSettings() {
         LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT topic", appConfig.mqttTopic);
     }
 
-    if (mqttDirty)
-      PSclient.disconnect();
-
     if (server.hasArg("temperatureRefreshInterval")){
       os_timer_disarm(&temperatureTimer);
       appConfig.temperatureRefreshInterval = atoi(server.arg("temperatureRefreshInterval").c_str());
       os_timer_arm(&temperatureTimer, appConfig.temperatureRefreshInterval * 1000, true);
       LogEvent(EVENTCATEGORIES::TemperatureInterval, 3, "New temperature refresh interval", server.arg("temperatureRefreshInterval").c_str());
-    }
+    }    
+
+    if (mqttDirty)
+      PSclient.disconnect();
+
     saveSettings();
+    ESP.reset();
+
   }
 
   fs::File f = SPIFFS.open("/pageheader.html", "r");
@@ -839,6 +843,7 @@ void handleNotFound(){
 }
 
 void SendHeartbeat(){
+
   if (PSclient.connected()){
 
     TimeChangeRule *tcr;        // Pointer to the time change rule
