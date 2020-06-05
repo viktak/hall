@@ -4,7 +4,7 @@
 #define HARDWARE_ID "Hall sensors"
 #define HARDWARE_VERSION "1.0"
 #define SOFTWARE_ID "Hall"
-#define FIRMWARE_VERSION "1.3"
+#define FIRMWARE_VERSION "1.4"
 
 #define JSON_SETTINGS_SIZE (JSON_OBJECT_SIZE(10) + 200)
 #define JSON_MQTT_COMMAND_SIZE 300
