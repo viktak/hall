@@ -67,7 +67,7 @@ void LogEvent(int Category, int ID, String Title, String Data){
 
     Serial.println(msg);
 
-    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/log", msg ).set_qos(0));
+    PSclient.publish((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/log").c_str(), msg.c_str(), false);
   }
 }
 
@@ -894,7 +894,7 @@ void SendHeartbeat(){
 
     serializeJson(doc, myJsonString);
 
-    PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/HEARTBEAT", myJsonString ).set_qos(0));
+    PSclient.publish((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/HEARTBEAT").c_str(), myJsonString.c_str(), 0);
   }
 
   needsHeartbeat = false;
@@ -906,7 +906,7 @@ void ReadTemperatures(){
     for (size_t i = 0; i < oneWireDevicesCount; i++) {
       thermometers[i].measuredTemperatureC = sensors.getTempC(thermometers[i].deviceAddress);
       if (thermometers[i].measuredTemperatureC!=-127){
-        PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/thermometers/" + OneWireDeviceAddress2HEX(thermometers[i].deviceAddress, ':'), String(thermometers[i].measuredTemperatureC) ).set_qos(0));
+        PSclient.publish((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/thermometers/" + OneWireDeviceAddress2HEX(thermometers[i].deviceAddress, ':')).c_str(), (String(thermometers[i].measuredTemperatureC)).c_str(), false );
         LogEvent(ReadTemp, 1, "Measurement", "1Wire: " + thermometers[i].FriendlyName + ": " + String(thermometers[i].measuredTemperatureC));
       }
     }
@@ -930,17 +930,19 @@ or
 
 Order of parameters is ignored. Whitespaces/new line characters are ignored.
 */
-void mqtt_callback(const MQTT::Publish& pub) {
+void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
   Serial.print("Topic:\t\t");
-  Serial.println(pub.topic());
+  Serial.println(topic);
 
   Serial.print("Payload:\t");
-  if (pub.payload_string()!=NULL)
-    Serial.println(pub.payload_string());
+  for (unsigned int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 
   StaticJsonDocument<JSON_MQTT_COMMAND_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, pub.payload_string());
+  DeserializationError error = deserializeJson(doc, payload);
 
   if (error) {
     Serial.println("Failed to parse incoming string.");
@@ -1245,13 +1247,16 @@ void loop(){
         ArduinoOTA.handle();
 
         if (!PSclient.connected()) {
-          PSclient.set_server(appConfig.mqttServer, appConfig.mqttPort);
+          PSclient.setServer(appConfig.mqttServer, appConfig.mqttPort);
+            String clientId = "ESP8266Client-";
+            clientId += String(random(0xffff), HEX);
 
-          if (PSclient.connect("ESP-" + String(ESP.getChipId()), MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE", 0, true, "offline" )){
-            PSclient.set_callback(mqtt_callback);
-            PSclient.subscribe(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/cmnd", 0);
+          if (PSclient.connect(clientId.c_str(), (MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE").c_str(), 0, true, "offline" )){
+            PSclient.setCallback(mqtt_callback);
 
-            PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE", "online" ).set_qos(0).set_retain(true));
+            PSclient.subscribe((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/cmnd").c_str(), 0);
+
+            PSclient.publish((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + String("/") + appConfig.mqttTopic + "/STATE").c_str(), "online", false);
             LogEvent(EVENTCATEGORIES::Conn, 1, "Node online", WiFi.localIP().toString());
           }
         }
@@ -1280,7 +1285,7 @@ void loop(){
               String payload;
               if ( pirInputs[i].value == 1 ) payload = "on";
               else payload = "off";
-              PSclient.publish(MQTT::Publish(MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/PIR0", payload ).set_qos(0));
+              PSclient.publish((MQTT_CUSTOMER + String("/") + MQTT_PROJECT + "/" + appConfig.mqttTopic + "/PIR0").c_str(), payload.c_str(), false);
               pirInputs[i].changed = false;
             }
           }
