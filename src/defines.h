@@ -1,3 +1,6 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
 #define MQTT_CUSTOMER "viktak"
 #define MQTT_PROJECT  "spiti"
 
@@ -16,3 +19,5 @@
 
 #define DEFAULT_TEMPERATURE_REFRESH_INTERVAL 120
 #define DEFAULT_HEARTBEAT_INTERVAL 300
+
+#endif
