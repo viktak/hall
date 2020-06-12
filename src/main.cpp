@@ -71,6 +71,23 @@ void LogEvent(int Category, int ID, String Title, String Data){
   }
 }
 
+void SetRandomSeed(){
+    uint32_t seed;
+
+    // random works best with a seed that can use 31 bits
+    // analogRead on a unconnected pin tends toward less than four bits
+    seed = analogRead(0);
+    delay(1);
+
+    for (int shifts = 3; shifts < 31; shifts += 3)
+    {
+        seed ^= analogRead(0) << shifts;
+        delay(1);
+    }
+
+    randomSeed(seed);
+}
+
 void accessPointTimerCallback(void *pArg) {
   ESP.reset();
 }
@@ -487,6 +504,7 @@ void handleStatus() {
     if (s.indexOf("%freeheapsize%")>-1) s.replace("%freeheapsize%",String(ESP.getFreeHeap()));
     if (s.indexOf("%freesketchspace%")>-1) s.replace("%freesketchspace%",String(ESP.getFreeSketchSpace()));
     if (s.indexOf("%friendlyname%")>-1) s.replace("%friendlyname%",appConfig.friendlyName);
+    if (s.indexOf("%mqtt-topic%")>-1) s.replace("%mqtt-topic%",appConfig.mqttTopic);
 
     //  Network settings
     switch (WiFi.getMode()) {
@@ -759,11 +777,14 @@ void handleNetworkSettings() {
       connectionState = STATE_CHECK_WIFI_CONNECTION;
       WiFi.disconnect(false);
 
+      ESP.reset();
     }
   }
 
   File f = LittleFS.open("/pageheader.html", "r");
+
   String headerString;
+
   if (f.available()) headerString = f.readString();
   f.close();
 
@@ -913,23 +934,6 @@ void ReadTemperatures(){
 
 }
 
-/*
-Sample message expected:
-
-{dig0:1, dig1:0, dig2:1, dig3:0, pwm0:127}
-
-or
-
-{
-  "dig0": 1,
-  "dig1": 0,
-  "dig2": 1,
-  "dig3": 0,
-  "pwm0": 127
-}
-
-Order of parameters is ignored. Whitespaces/new line characters are ignored.
-*/
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
   Serial.print("Topic:\t\t");
@@ -1111,7 +1115,7 @@ void setup() {
   os_timer_arm(&temperatureTimer, appConfig.temperatureRefreshInterval * 1000, true);
 
   //  Randomizer
-  srand(now());
+  SetRandomSeed();
 
   // Set the initial connection state
   connectionState = STATE_CHECK_WIFI_CONNECTION;
@@ -1227,7 +1231,7 @@ void loop(){
         if (checkInternetConnection()) {
           // We have an Internet connection
 
-          if (! ntpInitialized) {
+          if (!ntpInitialized) {
             // We are connected to the Internet for the first time so set NTP provider
             initNTP();
 
