@@ -988,7 +988,7 @@ ICACHE_RAM_ATTR void PIR_Interrupt_Handler(){
 
 void setup() {
   delay(1); //  Needed for PlatformIO serial monitor
-  Serial.begin(115200);
+  Serial.begin(DEBUG_SPEED);
   Serial.setDebugOutput(false);
   Serial.print("\n\n\n\rBooting node:     ");
   Serial.print(ESP.getChipId());
