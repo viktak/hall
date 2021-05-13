@@ -141,7 +141,7 @@ bool loadSettings(config& data) {
   {
     strcpy(appConfig.ssid, defaultSSID);
   }
-  
+
   if (doc["password"]){
     strcpy(appConfig.password, doc["password"]);
   }
@@ -149,7 +149,7 @@ bool loadSettings(config& data) {
   {
     strcpy(appConfig.password, DEFAULT_PASSWORD);
   }
-  
+
   if (doc["mqttServer"]){
     strcpy(appConfig.mqttServer, doc["mqttServer"]);
   }
@@ -157,7 +157,7 @@ bool loadSettings(config& data) {
   {
     strcpy(appConfig.mqttServer, DEFAULT_MQTT_SERVER);
   }
-  
+
   if (doc["mqttPort"]){
     appConfig.mqttPort = doc["mqttPort"];
   }
@@ -165,7 +165,7 @@ bool loadSettings(config& data) {
   {
     appConfig.mqttPort = DEFAULT_MQTT_PORT;
   }
-  
+
   if (doc["mqttTopic"]){
     strcpy(appConfig.mqttTopic, doc["mqttTopic"]);
   }
@@ -173,7 +173,7 @@ bool loadSettings(config& data) {
   {
     sprintf(appConfig.mqttTopic, "%s-%u", DEFAULT_MQTT_TOPIC, ESP.getChipId());
   }
-  
+
   if (doc["friendlyName"]){
     strcpy(appConfig.friendlyName, doc["friendlyName"]);
   }
@@ -181,7 +181,7 @@ bool loadSettings(config& data) {
   {
     strcpy(appConfig.friendlyName, NODE_DEFAULT_FRIENDLY_NAME);
   }
-  
+
   if (doc["timezone"]){
     appConfig.timeZone = doc["timezone"];
   }
@@ -189,7 +189,7 @@ bool loadSettings(config& data) {
   {
     appConfig.timeZone = 0;
   }
-  
+
   if (doc["heartbeatInterval"]){
     appConfig.heartbeatInterval = doc["heartbeatInterval"];
   }
@@ -197,7 +197,7 @@ bool loadSettings(config& data) {
   {
     appConfig.heartbeatInterval = DEFAULT_HEARTBEAT_INTERVAL;
   }
-  
+
   if (doc["temperatureRefreshInterval"]){
     appConfig.temperatureRefreshInterval = doc["temperatureRefreshInterval"];
   }
@@ -260,7 +260,7 @@ void defaultSettings(){
   #endif
 
   appConfig.mqttPort = DEFAULT_MQTT_PORT;
- 
+
   sprintf(defaultSSID, "%s-%u", DEFAULT_MQTT_TOPIC, ESP.getChipId());
   strcpy(appConfig.mqttTopic, defaultSSID);
 
@@ -483,7 +483,7 @@ void handleStatus() {
   f.close();
 
   time_t localTime = timezones[appConfig.timeZone]->toLocal(now(), &tcr);
-  
+
   String FirmwareVersionString = String(FIRMWARE_VERSION);
   String s;
 
@@ -720,7 +720,7 @@ void handleGeneralSettings() {
 
   char ss[2];
 
-  for (signed char i = 0; i < sizeof(tzDescriptions)/sizeof(tzDescriptions[0]); i++) {
+  for (unsigned char i = 0; i < sizeof(tzDescriptions)/sizeof(tzDescriptions[0]); i++) {
     itoa(i, ss, DEC);
     timezoneslist+="<option ";
     if (appConfig.timeZone == i){
@@ -1176,7 +1176,7 @@ void loop(){
           // Wifi is connected so check Internet
           digitalWrite(CONNECTION_STATUS_LED_GPIO, LOW);
           connectionState = STATE_CHECK_INTERNET_CONNECTION;
-          
+
           server.handleClient();
         }
         break;
