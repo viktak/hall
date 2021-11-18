@@ -671,8 +671,8 @@ void handleGeneralSettings() {
     }
 
     //  MQTT settings
-    if (server.hasArg("mqttbroker")){
-      if ((String)appConfig.mqttServer != server.arg("mqttbroker"))
+    if (server.hasArg("mqttbroker"))
+      if ((String)appConfig.mqttServer != server.arg("mqttbroker")){
         mqttDirty = true;
         sprintf(appConfig.mqttServer, "%s", server.arg("mqttbroker").c_str());
         LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT broker", appConfig.mqttServer);
@@ -685,8 +685,8 @@ void handleGeneralSettings() {
       LogEvent(EVENTCATEGORIES::MqttParamChange, 2, "New MQTT port", server.arg("mqttport").c_str());
     }
 
-    if (server.hasArg("mqtttopic")){
-      if ((String)appConfig.mqttTopic != server.arg("mqtttopic"))
+    if (server.hasArg("mqtttopic"))
+      if ((String)appConfig.mqttTopic != server.arg("mqtttopic")){
         mqttDirty = true;
         sprintf(appConfig.mqttTopic, "%s", server.arg("mqtttopic").c_str());
         LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT topic", appConfig.mqttTopic);
@@ -981,7 +981,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-ICACHE_RAM_ATTR void PIR_Interrupt_Handler(){
+IRAM_ATTR void PIR_Interrupt_Handler(){
   pirInputs[0].changed = true;
   pirInputs[0].value = digitalRead(pirInputs[0].gpio) == 1;
 }
