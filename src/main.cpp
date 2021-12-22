@@ -206,10 +206,6 @@ bool loadSettings(config& data) {
     appConfig.temperatureRefreshInterval = DEFAULT_TEMPERATURE_REFRESH_INTERVAL;
   }
 
-  String ma = WiFi.macAddress();
-  ma.replace(":","");
-  sprintf(defaultSSID, "%s-%s", appConfig.mqttTopic, ma.substring(6, 12).c_str());
-
   return true;
 }
 
@@ -1014,7 +1010,7 @@ void setup() {
     Serial.println("Config loaded.");
   }
 
-  WiFi.hostname(defaultSSID);
+  WiFi.hostname(appConfig.mqttTopic);
 
   //  Digital inputs
   for (size_t i = 0; i < sizeof(digitalInputs)/sizeof(digitalInputs[0]); i++) pinMode(digitalInputs[i].gpio, INPUT_PULLUP);
@@ -1091,11 +1087,7 @@ void setup() {
 
   server.onNotFound(handleNotFound);
 
-  //  Web server
-  if (MDNS.begin("esp8266")) {
-    Serial.println("MDNS responder started.");
-  }
-
+  
   //  Start HTTP (web) server
   server.begin();
   Serial.println("HTTP server started.");
@@ -1154,6 +1146,7 @@ void loop(){
       Serial.println();
       Serial.println("Note: The device will reset in 5 minutes.");
 
+      if (MDNS.begin(appConfig.mqttTopic)) Serial.println("MDNS responder started.");
 
       os_timer_setfn(&accessPointTimer, accessPointTimerCallback, NULL);
       os_timer_arm(&accessPointTimer, ACCESS_POINT_TIMEOUT, true);
@@ -1194,6 +1187,7 @@ void loop(){
           WiFi.mode(WIFI_STA);
 
           // Start connection process
+          WiFi.hostname((String)appConfig.mqttTopic);
           WiFi.begin(appConfig.ssid, appConfig.password);
 
           // Initialize iteration counter
@@ -1219,6 +1213,7 @@ void loop(){
           Serial.println(" Success!");
           Serial.print("IP address: ");
           Serial.println(WiFi.localIP());
+          if (MDNS.begin(appConfig.mqttTopic)) Serial.println("MDNS responder started.");
           connectionState = STATE_CHECK_INTERNET_CONNECTION;
         }
         break;
