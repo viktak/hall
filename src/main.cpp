@@ -668,10 +668,11 @@ void handleGeneralSettings() {
 
     //  MQTT settings
     if (server.hasArg("mqttbroker")){
-        if ((String)appConfig.mqttServer != server.arg("mqttbroker"))
+        if ((String)appConfig.mqttServer != server.arg("mqttbroker")){
             mqttDirty = true;
-        sprintf(appConfig.mqttServer, "%s", server.arg("mqttbroker").c_str());
-        LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT broker", appConfig.mqttServer);
+            sprintf(appConfig.mqttServer, "%s", server.arg("mqttbroker").c_str());
+            LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT broker", appConfig.mqttServer);
+        }
     }
 
     if (server.hasArg("mqttport")){
@@ -682,10 +683,11 @@ void handleGeneralSettings() {
     }
 
     if (server.hasArg("mqtttopic")){
-        if ((String)appConfig.mqttTopic != server.arg("mqtttopic"))
+        if ((String)appConfig.mqttTopic != server.arg("mqtttopic")){
             mqttDirty = true;
-        sprintf(appConfig.mqttTopic, "%s", server.arg("mqtttopic").c_str());
-        LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT topic", appConfig.mqttTopic);
+            sprintf(appConfig.mqttTopic, "%s", server.arg("mqtttopic").c_str());
+            LogEvent(EVENTCATEGORIES::MqttParamChange, 1, "New MQTT topic", appConfig.mqttTopic);
+        }
     }
 
     if (server.hasArg("temperatureRefreshInterval")){
@@ -1087,7 +1089,6 @@ void setup() {
 
   server.onNotFound(handleNotFound);
 
-  
   //  Start HTTP (web) server
   server.begin();
   Serial.println("HTTP server started.");
@@ -1191,7 +1192,7 @@ void loop(){
           WiFi.begin(appConfig.ssid, appConfig.password);
 
           // Initialize iteration counter
-          uint8_t attempt = 0;
+          uint8_t attempt = 50;
 
           while ((WiFi.status() != WL_CONNECTED) && (attempt++ < WIFI_CONNECTION_TIMEOUT)) {
             digitalWrite(CONNECTION_STATUS_LED_GPIO, LOW);
