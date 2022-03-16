@@ -248,12 +248,11 @@ namespace network
             timezoneslist += "\n";
         }
 
-        while (f.available())
+        if (f.available())
         {
             htmlString = f.readString();
         }
         f.close();
-
 
         String searchString = "value=\"" + (String)settings::temperatureRefreshInterval + "\"";
         htmlString.replace(searchString, searchString + " selected");
