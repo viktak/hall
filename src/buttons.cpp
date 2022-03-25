@@ -15,11 +15,11 @@ namespace buttons
     {
         if (btn == sensorPIR)
         {
-            mqtt::PublishData(((String)("PIR0")).c_str(), ((String)"off").c_str(), false);
+            mqtt::PublishData(((String)("PIR0")).c_str(), ((String)"off").c_str(), true);
         }
         else if (btn == sensorHall)
         {
-            Serial.println("sensorHall: Pressed");
+            // Serial.println("sensorHall: Pressed");
         }
     }
 
@@ -27,12 +27,12 @@ namespace buttons
     {
         if (btn == sensorPIR)
         {
-            mqtt::PublishData(((String)("PIR0")).c_str(), ((String)"on").c_str(), false);
+            mqtt::PublishData(((String)("PIR0")).c_str(), ((String)"on").c_str(), true);
         }
         else if (btn == sensorHall)
         {
-            Serial.print("sensorHall: Released after ");
-            Serial.println(btn.wasPressedFor());
+            // Serial.print("sensorHall: Released after ");
+            // Serial.println(btn.wasPressedFor());
         }
     }
     void setup()

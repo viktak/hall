@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 
-#include "NTP.h"
+#include "ntp.h"
 #include "settings.h"
 #include "network.h"
 #include "mqtt.h"
@@ -82,7 +82,6 @@ namespace connection
                 os_timer_arm(&accessPointTimer, ACCESS_POINT_TIMEOUT, true);
                 os_timer_disarm(&mqtt::heartbeatTimer);
             }
-
         }
         else
         {
@@ -165,7 +164,7 @@ namespace connection
                     if (!ntpInitialized)
                     {
                         // We are connected to the Internet for the first time so set NTP provider
-                        initNTP();
+                        ntp::setup();
 
                         ntpInitialized = true;
 
@@ -189,7 +188,8 @@ namespace connection
                 mqtt::loop();
                 tempSensors::loop();
                 buttons::loop();
-                
+                ntp::loop();
+
                 // Set next connection state
                 connectionState = STATE_CHECK_WIFI_CONNECTION;
                 break;
