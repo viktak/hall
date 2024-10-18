@@ -119,7 +119,12 @@ namespace network
         htmlString.replace("%firmwareversion%", String(FIRMWARE_VERSION));
         htmlString.replace("%chipid%", String((String)ESP.getChipId()));
         htmlString.replace("%uptime%", common::TimeIntervalToString(millis() / 1000));
-        htmlString.replace("%currenttime%", common::DateTimeToString(localTime));
+
+        char myDate[20];
+        common::DateTimeToString(myDate, localTime);
+
+        htmlString.replace("%currenttime%", myDate);
+
         htmlString.replace("%lastresetreason%", ESP.getResetReason());
         htmlString.replace("%flashchipsize%", String(ESP.getFlashChipSize()));
         htmlString.replace("%flashchipspeed%", String(ESP.getFlashChipSpeed()));

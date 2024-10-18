@@ -6,16 +6,14 @@
 
 namespace common
 {
-#define __debugSettings
-
-    static const int32_t DEBUG_SPEED = 921600;
+    static const int32_t DEBUG_SPEED = 115200;
     static const String HARDWARE_ID = "hall sensors";
     static const String HARDWARE_VERSION = "1.0";
     static const String FIRMWARE_ID = "hall";
 
     extern String GetDeviceMAC();
     extern char *GetFullDateTime(const char *formattingString, size_t size);
-    extern String DateTimeToString(const time_t time);
+    extern void DateTimeToString(char *dest, time_t localTime);
     extern String TimeIntervalToString(const time_t time);
     extern String GetDeviceMAC();
 

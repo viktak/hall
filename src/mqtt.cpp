@@ -7,6 +7,7 @@
 #include "network.h"
 #include "common.h"
 #include "logger.h"
+#include "TimeChangeRules.h"
 
 #define MQTT_CUSTOMER "viktak"
 #define MQTT_PROJECT "spiti"
@@ -71,7 +72,11 @@ namespace mqtt
         JsonObject sysDetails = doc.createNestedObject("System");
         sysDetails["ChipID"] = (String)ESP.getChipId();
 
-        sysDetails["Time"] = common::GetFullDateTime("%F %T", size_t(20));
+        TimeChangeRule *tcr;
+        time_t localTime = timechangerules::timezones[settings::timeZone]->toLocal(now(), &tcr);
+        char myDate[20];
+        common::DateTimeToString(myDate, localTime);
+        sysDetails["Time"] = myDate;
         sysDetails["Node"] = settings::localHost;
         sysDetails["Freeheap"] = ESP.getFreeHeap();
 
