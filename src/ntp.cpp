@@ -14,8 +14,8 @@ namespace ntp
 {
     WiFiUDP ntpUDP;
 
-#ifdef __debugSettings
-    char timeServer[] = "192.168.1.2";
+#ifdef DEBUG_NTPClient
+    char timeServer[] = "192.168.123.6";
 #else
     char timeServer[] = "pool.ntp.org";
 #endif
