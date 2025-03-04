@@ -11,13 +11,12 @@
 
 namespace tempSensors
 {
-    os_timer_t temperatureTimer;
-    bool needsTemperature = true;
-
     uint8_t oneWireDevicesCount;
     OneWire oneWire(ONE_WIRE_GPIO);
     DallasTemperature sensors(&oneWire);
     thermometer thermometers[32];
+
+    unsigned long oldTemperatureMillis = 0;
 
     String OneWireDeviceAddress2HEX(DeviceAddress deviceAddress, char Separator)
     {
@@ -35,11 +34,6 @@ namespace tempSensors
                 result += Separator;
         }
         return result;
-    }
-
-    void temperatureTimerCallback(void *pArg)
-    {
-        needsTemperature = true;
     }
 
     void InitSensors()
@@ -88,17 +82,14 @@ namespace tempSensors
     void setup()
     {
         InitSensors();
-
-        os_timer_setfn(&temperatureTimer, temperatureTimerCallback, NULL);
-        os_timer_arm(&temperatureTimer, settings::temperatureRefreshInterval * 1000, true);
     }
 
     void loop()
     {
-        if (needsTemperature)
+        if (millis() - oldTemperatureMillis > settings::temperatureRefreshInterval * 1000)
         {
             ReadTemperatures();
-            needsTemperature = false;
+            oldTemperatureMillis = millis();
         }
     }
 
