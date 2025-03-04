@@ -42,32 +42,14 @@ namespace common
         sprintf(dest, "%u-%02u-%02u %02u:%02u:%02u", year(localTime), month(localTime), day(localTime), hour(localTime), minute(localTime), second(localTime));
     }
 
+
     String TimeIntervalToString(const time_t time)
     {
-
-        String myTime = "";
-        char s[2];
-
-        //  hours
-        itoa((time / 3600), s, DEC);
-        myTime += s;
-        myTime += ":";
-
-        //  minutes
-        if (minute(time) < 10)
-            myTime += "0";
-
-        itoa(minute(time), s, DEC);
-        myTime += s;
-        myTime += ":";
-
-        //  seconds
-        if (second(time) < 10)
-            myTime += "0";
-
-        itoa(second(time), s, DEC);
-        myTime += s;
-        return myTime;
+        char tmp[10];
+    
+        sprintf(tmp, "%02u:%02u:%02u", time / 3600, minute(time), second(time));
+    
+        return (String)tmp;
     }
 
     String GetDeviceMAC()
