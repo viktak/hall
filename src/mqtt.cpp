@@ -9,9 +9,6 @@
 #include "logger.h"
 #include "TimeChangeRules.h"
 
-#define MQTT_CUSTOMER "viktak"
-#define MQTT_PROJECT "spiti"
-
 namespace mqtt
 {
     bool needsHeartbeat = false;

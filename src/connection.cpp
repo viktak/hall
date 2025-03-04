@@ -121,6 +121,7 @@ namespace connection
                 // Start connection process
                 WiFi.hostname(settings::localHost); //  so that it shows up coorectly in DHCP/DNS on the router
                 WiFi.begin(settings::wifiSSID, settings::wifiPassword);
+                WiFi.setSleep(false);
 
                 // Initialize iteration counter
                 uint8_t attempt = 0;

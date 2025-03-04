@@ -14,9 +14,7 @@
 void setup()
 {
     Serial.begin(common::DEBUG_SPEED);
-#ifdef __debugSettings
     delay(1000); //  Wait for PlatformIO serial monitor
-#endif
 
     String FirmwareVersionString = String(FIRMWARE_VERSION) + " @ " + String(__TIME__) + " - " + String(__DATE__);
 
